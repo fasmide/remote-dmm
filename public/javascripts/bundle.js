@@ -514,6 +514,7 @@ var DmmClient = module.exports = function(readingView, histogramView, trendView)
 	this.trendValues = [];
 
 	this.prepareTrendChart();
+	this.prepareHistogramChart();
 
 	this.readsPerSecCounter = 0;
 
@@ -586,10 +587,28 @@ DmmClient.prototype.prepareTrendChart = function() {
 					type : "spline",
 					dataPoints : this.trendValues
 				}
-			]
+			],
+			axisY:{
+				includeZero: false  //try changing it to true
+				}
 		});
 
 	this.trendChart.render();
+};
+
+DmmClient.prototype.prepareHistogramChart = function() {
+	this.histogramChart = new CanvasJS.Chart("histogramChartContainer", {
+			title : {
+				text : "Histogram"
+			},
+			data : [{
+					type : "spline",
+					dataPoints : this.histogramValues
+				}
+			]
+		});
+
+	this.histogramChart.render();
 };
 
 DmmClient.prototype.recordValue = function(value) {

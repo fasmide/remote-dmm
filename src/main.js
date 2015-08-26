@@ -4,7 +4,5 @@ var DmmClient = require('./dmmclient'),
 
 debug('Creating DmmClient...');
 var dmmClient = new DmmClient(
-	$('#reading'),
-	$('#histogram'),
-	$('#trend')
+	$('#reading')
 );
