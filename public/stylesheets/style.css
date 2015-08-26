@@ -6,3 +6,7 @@ body {
 a {
   color: #00B7FF;
 }
+
+#reading > .value {
+	font-size: 600%;
+}

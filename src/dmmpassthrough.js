@@ -17,19 +17,25 @@ DmmPassthrough.prototype.setup = function() {
 
 	debug("Loading dmm module %s from %s", dmmName, dmmPath);
 
-	this.dmm = new require(dmmPath)();
+	var dmm = require(dmmPath);
+	this.dmm = new dmm({option: 'one'});
 
 	this.dmm.on('value', this.incomingReading.bind(this));
 };
 
 DmmPassthrough.prototype.connection = function(ws) {
-	debug("New connection: %j", ws);
+	debug("New connection");
 };
 
 DmmPassthrough.prototype.incomingReading = function(data) {
 	data = data.toString();
 
 	this.wss.clients.forEach(function (client) {
-		client.send(JSON.stringify({value: data}));
+		try {
+			client.send(JSON.stringify({value: data, type: 'reading'}));
+
+		} catch(e) {
+
+		}
 	});
 };

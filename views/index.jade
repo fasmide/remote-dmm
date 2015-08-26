@@ -1,5 +1,27 @@
 extends layout
 
 block content
-	h1= title
-	p Welcome to #{title}
+	div.row
+		div.col-md-6#histogram
+			p Histogram
+		div.col-md-6#reading
+			p.value.text-right OL
+			table.table.table-condensed
+				thead
+					tr
+						th.text-center Vpp
+						th.text-center Min
+						th.text-center Max
+						th.text-center Avg
+						th.text-center Count
+						th.text-center R/sec
+				tr.text-center
+					td.vpp
+					td.min
+					td.max
+					td.avg
+					td.count
+					td.readssec
+	div.row
+		div.col-md-12#trend
+			div(style="height: 300px; width: 100%;")#trendChartContainer
