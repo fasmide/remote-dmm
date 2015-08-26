@@ -16,6 +16,10 @@ var DmmClient = module.exports = function(readingView, histogramView, trendView)
 
 	this.trendValues = [];
 
+	this.histogramValues = [
+		{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0}
+	];
+
 	this.prepareTrendChart();
 	this.prepareHistogramChart();
 
@@ -83,37 +87,57 @@ DmmClient.prototype.fixedValue = function(value) {
 
 DmmClient.prototype.prepareTrendChart = function() {
 	this.trendChart = new CanvasJS.Chart("trendChartContainer", {
-			title : {
-				text : "Trend"
-			},
-			data : [{
-					type : "spline",
-					dataPoints : this.trendValues
-				}
-			],
-			axisY:{
-				includeZero: false  //try changing it to true
-				}
-		});
+		title : {
+			text : "Trend"
+		},
+		data : [{
+			type : "spline",
+			dataPoints : this.trendValues
+		}],
+		axisY:{
+			includeZero: false  //try changing it to true
+		}
+	});
 
 	this.trendChart.render();
 };
 
 DmmClient.prototype.prepareHistogramChart = function() {
 	this.histogramChart = new CanvasJS.Chart("histogramChartContainer", {
-			title : {
-				text : "Histogram"
-			},
-			data : [{
-					type : "spline",
-					dataPoints : this.histogramValues
-				}
-			]
-		});
+		title : {
+			text : "Histogram"
+		},
+		data : [{
+				dataPoints : this.histogramValues
+		}]
+	});
 
 	this.histogramChart.render();
 };
 
+DmmClient.prototype.addValueToHistogram = function(value) {
+
+	var steps = (this.max-this.min)/this.histogramValues.length;
+
+	//to find the index we:
+	var index = Math.floor((value-this.min)/steps);
+
+	if (index < 0) {
+		//we need rebuild of histogram
+		console.log("REBUILD!");
+		return;
+	}
+	if (index >= this.histogramValues.length) {
+		//we need rebuild
+		console.log("REBUILD!");
+		return;
+	}
+	console.log(index, steps);
+	this.histogramValues[index].y++;
+};
+DmmClient.prototype.rebuildHistogramValues = function() {
+
+};
 DmmClient.prototype.recordValue = function(value) {
 	value = parseFloat(value);
 
@@ -126,6 +150,8 @@ DmmClient.prototype.recordValue = function(value) {
 		//First reading!
 		this.min = value;
 		this.max = value;
+		this.avg = value;
+		this.total = value;
 	}
 
 	if (this.min > value) {
@@ -135,6 +161,9 @@ DmmClient.prototype.recordValue = function(value) {
 	if (this.max < value) {
 		this.max = value;
 	}
+
+	//for histogram
+	this.addValueToHistogram(value);
 
 	this.total += value;
 
@@ -155,4 +184,5 @@ DmmClient.prototype.onReading = function(reading) {
 	this.readingView.vpp.text((this.max-this.min).toFixed(this.maxDigitsSeen));
 
 	this.trendChart.render();
+	this.histogramChart.render();
 };
