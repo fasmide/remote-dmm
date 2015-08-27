@@ -12,7 +12,7 @@ DmmPassthrough.prototype.setup = function() {
 
 	this.wss.on('connection', this.connection.bind(this));
 
-	var dmmName = process.env.DMM;
+	var dmmName = process.env.DMM || 'dummy';
 	var dmmPath = util.format('./dmms/%s', dmmName);
 
 	debug("Loading dmm module %s from %s", dmmName, dmmPath);
