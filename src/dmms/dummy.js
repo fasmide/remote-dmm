@@ -4,10 +4,11 @@ var debug = require('debug')('dmm:dmms:Dummy'),
 
 var Dummy = module.exports = function(options) {
 	debug("Dummy dmm loaded....");
-
+	var y = 0;
 	setInterval(function() {
-		this.emit('value', (Math.random() * 10 - 5).toFixed(3));
-	}.bind(this), 250);
+		y += (Math.random() * 10 - 5);
+		this.emit('value', y.toFixed(3));
+	}.bind(this), 10);
 };
 
 util.inherits(Dummy, EventEmitter);

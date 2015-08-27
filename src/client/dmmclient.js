@@ -10,12 +10,16 @@ var DmmClient = module.exports = function(readingView, histogramView, trendView)
 
 	this.max = 0;
 	this.min = 0;
+
 	this.avg = 0;
 	this.total = 0;
 	this.values = [];
 
 	this.trendValues = [];
 
+
+	this.hMax = 0;
+	this.hMin = 0;
 	this.histogramValues = [
 		{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0}
 	];
@@ -117,25 +121,42 @@ DmmClient.prototype.prepareHistogramChart = function() {
 
 DmmClient.prototype.addValueToHistogram = function(value) {
 
-	var steps = (this.max-this.min)/this.histogramValues.length;
+	var steps = (this.hMax-this.hMin)/(this.histogramValues.length-1);
 
 	//to find the index we:
-	var index = Math.floor((value-this.min)/steps);
+	var index = Math.floor((value-this.hMin)/steps);
 
 	if (index < 0) {
 		//we need rebuild of histogram
 		console.log("REBUILD!");
+		this.rebuildHistogramValues();
 		return;
 	}
 	if (index >= this.histogramValues.length) {
 		//we need rebuild
 		console.log("REBUILD!");
+		this.rebuildHistogramValues();
 		return;
 	}
-	console.log(index, steps);
 	this.histogramValues[index].y++;
 };
 DmmClient.prototype.rebuildHistogramValues = function() {
+
+	this.hMin = this.min;
+	this.hMax = this.max;
+
+	var steps = (this.hMax-this.hMin)/(this.histogramValues.length-1);
+
+	//reset values
+	for (var i = this.histogramValues.length - 1; i >= 0; i--) {
+		this.histogramValues[i].y = 0;
+	};
+
+	//count up
+	for (var i = this.values.length - 1; i >= 0; i--) {
+		var index = Math.floor((this.values[i]-this.hMin)/steps);
+		this.histogramValues[index].y++;
+	};
 
 };
 DmmClient.prototype.recordValue = function(value) {
