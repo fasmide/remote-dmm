@@ -507,11 +507,19 @@ var DmmClient = module.exports = function(readingView, histogramView, trendView)
 
 	this.max = 0;
 	this.min = 0;
+
 	this.avg = 0;
 	this.total = 0;
 	this.values = [];
 
 	this.trendValues = [];
+
+
+	this.hMax = 0;
+	this.hMin = 0;
+	this.histogramValues = [
+		{y: 0}, {y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0},	{y: 0}
+	];
 
 	this.prepareTrendChart();
 	this.prepareHistogramChart();
@@ -571,8 +579,8 @@ DmmClient.prototype.fixedValue = function(value) {
 	var index = value.indexOf('.');
 	var digits = value.length - (index+1);
 
-	if(digits > this.maxDigitsSeen) {
-		debug("I have seen more digits! %s", digits);
+	if(index !== -1 && digits > this.maxDigitsSeen) {
+		debug("I have seen more digits! %s total, value: %s", digits, value);
 		this.maxDigitsSeen = digits;
 	}
 	return parseFloat(value).toFixed(this.maxDigitsSeen);
@@ -580,37 +588,90 @@ DmmClient.prototype.fixedValue = function(value) {
 
 DmmClient.prototype.prepareTrendChart = function() {
 	this.trendChart = new CanvasJS.Chart("trendChartContainer", {
-			title : {
-				text : "Trend"
-			},
-			data : [{
-					type : "spline",
-					dataPoints : this.trendValues
-				}
-			],
-			axisY:{
-				includeZero: false  //try changing it to true
-				}
-		});
+		title : {
+			text : "Trend"
+		},
+		data : [{
+			type : "spline",
+			dataPoints : this.trendValues
+		}],
+		axisY:{
+			includeZero: false  //try changing it to true
+		}
+	});
 
 	this.trendChart.render();
 };
 
 DmmClient.prototype.prepareHistogramChart = function() {
 	this.histogramChart = new CanvasJS.Chart("histogramChartContainer", {
-			title : {
-				text : "Histogram"
-			},
-			data : [{
-					type : "spline",
-					dataPoints : this.histogramValues
-				}
-			]
-		});
+		title : {
+			text : "Histogram"
+		},
+		data : [{
+				dataPoints : this.histogramValues
+		}]
+	});
 
 	this.histogramChart.render();
 };
 
+DmmClient.prototype.addValueToHistogram = function(value) {
+
+	var steps = (this.hMax-this.hMin)/(this.histogramValues.length-1);
+
+	//to find the index we:
+	var index = Math.floor((value-this.hMin)/steps);
+
+	if (index < 0) {
+		//we need rebuild of histogram
+		this.rebuildHistogramValues();
+		return;
+	}
+	if (index >= this.histogramValues.length) {
+		//we need rebuild
+		this.rebuildHistogramValues();
+		return;
+	}
+	this.histogramValues[index].y++;
+
+	this.lastReadingColored();
+};
+DmmClient.prototype.rebuildHistogramValues = function() {
+
+	debug("Rebuilding histogram");
+
+	this.hMin = this.min;
+	this.hMax = this.max;
+
+	var steps = (this.hMax-this.hMin)/(this.histogramValues.length-1);
+
+	//reset values
+	for (var i = this.histogramValues.length - 1; i >= 0; i--) {
+		this.histogramValues[i].y = 0;
+		this.histogramValues[i].label = (this.hMin + (steps*i)).toFixed(this.maxDigitsSeen);
+		this.histogramValues[i].color = "#B0D0B0";
+	};
+
+	//count up
+	for (var i = this.values.length - 1; i >= 0; i--) {
+		var index = Math.floor((this.values[i]-this.hMin)/steps);
+		this.histogramValues[index].y++;
+	};
+
+	this.lastReadingColored();
+
+};
+
+DmmClient.prototype.lastReadingColored = function() {
+	var steps = (this.hMax-this.hMin)/(this.histogramValues.length-1);
+	var index = Math.floor((this.values[this.values.length-1]-this.hMin)/steps);
+
+	for (var i = this.histogramValues.length - 1; i >= 0; i--) {
+		this.histogramValues[i].color = "#B0D0B0";
+	};
+	this.histogramValues[index].color = "#1E90FF";
+};
 DmmClient.prototype.recordValue = function(value) {
 	value = parseFloat(value);
 
@@ -623,6 +684,13 @@ DmmClient.prototype.recordValue = function(value) {
 		//First reading!
 		this.min = value;
 		this.max = value;
+		this.avg = value;
+		this.total = value;
+	} else {
+		this.total += value;
+
+		this.avg = this.total/this.values.length;
+
 	}
 
 	if (this.min > value) {
@@ -633,9 +701,9 @@ DmmClient.prototype.recordValue = function(value) {
 		this.max = value;
 	}
 
-	this.total += value;
+	//for histogram
+	this.addValueToHistogram(value);
 
-	this.avg = this.total/this.values.length;
 
 	this.readsPerSecCounter++;
 
@@ -652,6 +720,7 @@ DmmClient.prototype.onReading = function(reading) {
 	this.readingView.vpp.text((this.max-this.min).toFixed(this.maxDigitsSeen));
 
 	this.trendChart.render();
+	this.histogramChart.render();
 };
 },{"debug":1}],5:[function(require,module,exports){
 var DmmClient = require('./dmmclient'),

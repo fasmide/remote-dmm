@@ -8,7 +8,7 @@ var Dummy = module.exports = function(options) {
 	setInterval(function() {
 		y += (Math.random() * 10 - 5);
 		this.emit('value', y.toFixed(3));
-	}.bind(this), 10);
+	}.bind(this), 250);
 };
 
 util.inherits(Dummy, EventEmitter);
