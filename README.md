@@ -25,8 +25,8 @@ The fluke45 module assumes a serial tty at `/dev/ttyUSB0` at 9600 baudrate 8 N 1
 
 ## Supported DMMs
 
-- Fluke 45 bench meter (the meter must be put in print mode)
-- Dummy (for development)
+- fluke45: Fluke 45 bench meter (the meter must be put in print mode)
+- dummy: Dummy (for development)
 
 Yeah thats not too impressing yet, i do have a ut61e laying around and I'll get to it some day :)
 
