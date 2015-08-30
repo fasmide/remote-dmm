@@ -32,6 +32,8 @@ Yeah thats not too impressing yet, i do have a ut61e laying around and I'll get 
 
 You are very welcome to add support for more DMMs! Its simple, the modules only need to implement EventEmitter and `emit` values when ever they have a new reading, read on.
 
+Ive also thought about looking into sigrok's drivers and somehow make them work with this, not sure how to go about it though.
+
 ## Developing
 remote-dmm uses browserify to build a bundle.js file, install both browserify and watchify to have it rebuild the bundle as you go:
 
