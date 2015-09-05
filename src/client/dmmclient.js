@@ -52,6 +52,15 @@ DmmClient.prototype.connect = function() {
 
 };
 
+DmmClient.prototype.onDownload = function() {
+
+	var dataToDownload = this.values.join("\n");
+
+	document.location = 'data:Application/octet-stream,' +
+		encodeURIComponent(dataToDownload);
+
+};
+
 DmmClient.prototype.findReadingViewElements = function(readingView) {
 	this.readingView = {};
 	this.readingView.value = $('.value', readingView);
@@ -61,6 +70,7 @@ DmmClient.prototype.findReadingViewElements = function(readingView) {
 	this.readingView.count = $('.count', readingView);
 	this.readingView.vpp = $('.vpp', readingView);
 	this.readingView.readssec = $('.readssec', readingView);
+	$('.exportBtn').on('click', this.onDownload.bind(this));
 	console.log(this.readingView);
 };
 
