@@ -1,6 +1,5 @@
 var debug = require('debug')('dmm:dmms:Fluke45'),
-	com = require('serialport'),
-	SerialPort = com.SerialPort,
+	SerialPort = require('serialport'),
 
 	EventEmitter = require('events').EventEmitter,
 	util = require('util');
@@ -10,9 +9,9 @@ var Fluke45 = module.exports = function(options) {
 	debug("Opening fluke45 dmm");
 
 	//this will propperly have some options down the road
-	this.serialPort = new SerialPort("/dev/ttyUSB0", {
+	this.serialPort = new SerialPort("/dev/ttyS0", {
 		baudrate: 9600,
-		parser: com.parsers.readline('\n', 'ascii')
+		parser: SerialPort.parsers.readline('\n', 'ascii')
 	});
 
 	this.serialPort.on('data', this.onData.bind(this));
